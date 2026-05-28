@@ -36,7 +36,7 @@ Add the **private key** as a GitHub secret:
 
 Also add these secrets:
 - `DEPLOY_HOST` — your server's IP, e.g. `192.168.1.118`
-- `DEPLOY_USER` — your SSH username, e.g. `dpall`
+- `DEPLOY_USER` — your SSH username on the server
 
 ---
 
