@@ -1,0 +1,32 @@
+# Secrets — never commit these
+*.key
+*.pem
+*.p12
+*.pfx
+.env
+.env.*
+secrets/
+credentials/
+
+# WireGuard private keys specifically
+**/privatekey
+**/private.key
+
+# SSH keys
+id_rsa
+id_ed25519
+id_ecdsa
+*.ppk
+
+# Docker
+.docker/
+
+# Editor
+.vscode/settings.json
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

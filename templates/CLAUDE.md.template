@@ -1,0 +1,65 @@
+# CLAUDE.md
+
+Briefing for Claude Code. Read this first.
+
+---
+
+## What this repo is
+
+[One paragraph: what system this config manages, what machine it runs on, and
+what the source of truth is. Example: "Config snapshot for a self-hosted DNS +
+VPN stack on an HP t630. The live machine is the source of truth. Edits here
+don't take effect until deployed."]
+
+---
+
+## Hardware
+
+- **[Machine name]** — [CPU], [RAM], [storage]
+- **OS:** Ubuntu [version], kernel [version]
+- **NIC:** `[interface name]` (e.g. `enp1s0`)
+
+---
+
+## Network topology
+
+```
+ISP
+  └── Router    [IP]    [role]
+        └── Server  [IP]  [role]
+              └── wg0  [subnet]  WireGuard
+```
+
+---
+
+## Services
+
+| Service | Runtime | Port(s) | Accessible from |
+| ------- | ------- | ------- | --------------- |
+| [name] | [Docker/host] | [port] | [LAN/WG/internet] |
+
+---
+
+## Deploy paths
+
+| Repo path | System path | Reload |
+| --------- | ----------- | ------ |
+| `service/file.conf` | `/etc/service/file.conf` | `sudo systemctl restart service` |
+
+---
+
+## Known issues
+
+| Issue | Action |
+| ----- | ------ |
+| [thing that is broken or needs attention] | [what to do about it] |
+
+---
+
+## Verification
+
+```bash
+# Commands that confirm the system is healthy after a change
+systemctl status [service]
+docker ps
+```

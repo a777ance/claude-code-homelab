@@ -1,0 +1,64 @@
+name: Deploy to homelab
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/deploy_key
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/deploy_key
+          cat >> ~/.ssh/config <<EOF
+          Host homelab
+            HostName ${{ secrets.DEPLOY_HOST }}
+            User ${{ secrets.DEPLOY_USER }}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+          EOF
+
+      # ---------------------------------------------------------------
+      # Copy files to server
+      # Adjust the source/destination paths for your repo layout.
+      # Each rsync call maps a repo folder to its system path.
+      # ---------------------------------------------------------------
+
+      - name: Sync unbound config
+        run: |
+          rsync -avz --delete ./unbound/ \
+            homelab:/etc/unbound/unbound.conf.d/
+
+      - name: Sync pihole compose
+        run: |
+          rsync -avz ./pihole/docker-compose.yml \
+            homelab:~/pihole/docker-compose.yml
+
+      # ---------------------------------------------------------------
+      # Reload services
+      # Only reload what changed. If you always reload everything,
+      # a bad config in one service can break an unrelated deploy.
+      # ---------------------------------------------------------------
+
+      - name: Reload unbound
+        if: contains(github.event.commits[0].modified, 'unbound/')
+        run: ssh homelab "sudo systemctl restart unbound"
+
+      - name: Reload pihole
+        if: contains(github.event.commits[0].modified, 'pihole/')
+        run: ssh homelab "cd ~/pihole && docker compose up -d"
+
+      # ---------------------------------------------------------------
+      # Verify the system is still healthy
+      # ---------------------------------------------------------------
+
+      - name: Health check
+        run: |
+          ssh homelab "systemctl is-active unbound"
+          ssh homelab "docker ps --filter name=pihole --format '{{.Status}}'"
