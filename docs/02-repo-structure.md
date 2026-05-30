@@ -81,13 +81,7 @@ A real example: [a777ance/localDNS CLAUDE.md](https://github.com/a777ance/localD
 - Passwords or tokens — use environment variables or `.env` files that are gitignored
 - System state files (`/etc/hosts`, `/etc/resolv.conf`) — these change constantly
 
-Add a `.gitignore`:
-```
-*.key
-*.pem
-.env
-secrets/
-```
+Copy [templates/.gitignore.template](../templates/.gitignore.template) as your `.gitignore`.
 
 ---
 
