@@ -13,35 +13,35 @@ which documents a self-hosted DNS + VPN + monitoring stack on an HP t630.
 
 ---
 
+## Memory system
+
+All repos in this organisation use the MANIFEST + `memory/` paged memory convention.
+See `memory/manifest-convention.md` for the full spec.
+
+Short version:
+- Read `MANIFEST.md` first, every session
+- Fetch only files whose topic has **no brackets**
+- `[label]` topics exist and the summary is enough — skip the fetch unless it becomes relevant
+- Never move files; change the bracket state in MANIFEST instead
+
+---
+
 ## Repo structure
 
 ```
 claude-code-homelab/
-├── CLAUDE.md               ← you are here
-├── README.md               ← start here
-├── docs/
-│   ├── 01-prerequisites.md
-│   ├── 02-repo-structure.md
-│   ├── 03-github-setup.md
-│   ├── 04-deploys.md
-│   └── 05-best-practices.md
-└── templates/
-    ├── CLAUDE.md.template      ← copy this when starting a new infra repo
-    ├── deploy.yml              ← GitHub Actions deploy workflow template
-    └── .gitignore.template     ← secrets-safe gitignore for infra repos
+├── CLAUDE.md                        ← you are here
+├── MANIFEST.md                      ← read this first
+├── README.md
+└── memory/
+    ├── manifest-convention.md       ← full spec for the memory system
+    ├── setup-guide.md               ← the actual guide content
+    └── templates.md                 ← CLAUDE.md, deploy.yml, .gitignore templates
 ```
-
----
-
-## Working philosophy
-
-- Docs here are meant to be followed sequentially by a new user
-- All examples reference localDNS — link to the actual files, don't copy them
-- When updating a step, verify it still matches localDNS's current state
-- The goal is reproducibility: someone with a fresh Linux box should get to parity
 
 ---
 
 ## Related repos
 
-- **[a777ance/localDNS](https://github.com/a777ance/localDNS)** — the case study; its CLAUDE.md links back here
+- **[a777ance/localDNS](https://github.com/a777ance/localDNS)** — the case study
+- **[a777ance/azure-lab](https://github.com/a777ance/azure-lab)** — Azure equivalent of the homelab
