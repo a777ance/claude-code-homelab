@@ -32,6 +32,55 @@ WRITE Repo closed. Journal bubble only. No reads.   Output here.
 
 ---
 
+## The DIFF Command
+
+At any point in a session — including deep inside write mode — the user may call DIFF. It is a hard-discrepancy audit between two representations of the same truth:
+
+- **The repo** — canonical, ground truth, files as they exist
+- **The bubble** — live session gist, accumulated through compacts, intentionally lossy, possibly drifted
+
+### What DIFF hunts for
+
+Hard discrepancies only — factual contradictions:
+- Bubble says file is empty / repo file has content
+- Bubble says deadline is December / repo says November
+- Bubble has a character unnamed / map file has a name
+
+**Not** discrepancies (ignore these):
+- Tone differences
+- Creative interpretation
+- Emphasis shifts
+- Anything that is intentional lossy artifact
+
+### DIFF output format
+
+```
+DIFF — [session context]
+
+[1] Bubble: ch01 is unwritten
+    Repo:   ch01.md exists, 800 words
+    → Vote: original / bubble
+
+[2] Bubble: deadline is December
+    Repo:   README says November 30
+    → Vote: original / bubble
+```
+
+### The vote
+
+- **Vote original** → repo is right. Bubble corrects in-session. No file write.
+- **Vote bubble** → bubble is right. Repo is behind. Claude proposes the specific edit. User approves before any write.
+
+### DIFF properties
+
+- Does not compact
+- Does not seal any zoom level
+- Temporarily suspends write-mode lockout
+- Can be called multiple times in one session
+- Journal bubble resumes exactly where it left off after votes are applied
+
+---
+
 ## Implementation
 
 ### 1. T-0: The nerve center README
@@ -48,17 +97,13 @@ The root README is not a project description — it is a **hyperlinked map** of 
 - [Characters](map/characters/README.md)
 - [Chapter index](manuscript/chapters/)
 ...
-
-## Rules
-...
 ```
 
 ### 2. Pre-built zoom slices
 
 Store pre-built T-1 and T-2 slices in a `context/` directory. Each slice:
 - States its zoom level and purpose
-- Lists exactly which files to read
-- Includes the links to follow within those files
+- Lists exactly which files to read and follow
 - Ends with a compact instruction and seal notice
 
 ```markdown
@@ -71,52 +116,17 @@ Store pre-built T-1 and T-2 slices in a `context/` directory. Each slice:
 *After reading → /compact → write or zoom deeper.*
 ```
 
-### 3. CLAUDE.md protocol
+### 3. CLAUDE.md protocol encoding
 
-Encode the zoom sequence and perimeter rule explicitly in CLAUDE.md:
-
-```markdown
-## T-Minus Zoom Protocol
-
-| Level | Read | Action | Result |
-|-------|------|--------|--------|
-| T-0 | README.md | /compact | T-0 sealed |
-| T-1 | context/t1-[topic].md | /compact | T-1 sealed |
-| T-N | zoom as needed | /compact each time | each level seals |
-| WRITE | repo closed | conversation only | journal bubble |
-
-Once a level is sealed, do not re-read its files. Lossy gist is intentional.
-```
-
-### 4. Hyperlink discipline
-
-The protocol only works if files are cross-linked. Every file should link to:
-- Its parent index
-- Related sibling nodes
-- Downstream dependencies
-
-Claude follows links *within* a zoom level before compacting. This ensures the gist captures the graph, not just the root file.
-
----
-
-## When to use this pattern
-
-Use T-minus zoom when:
-- The repo has more content than fits in a useful working context
-- Output quality degrades as session length grows
-- The work requires deep focus (writing, design, analysis) not wide exploration
-- You want the model to be *informed* by the full repo without being *diluted* by it
-
-Do not use it when:
-- The task genuinely requires holding all content simultaneously (e.g. find-and-replace across files)
-- The repo is small enough to read fully without quality loss
+Encode both the zoom sequence and DIFF command explicitly in CLAUDE.md. The model needs to see both protocols in T-0 to apply them correctly throughout the session.
 
 ---
 
 ## Key lessons
 
-1. **The README is T-0, not documentation.** Rewrite it as a navigable map, not a project description. Dense links, current state, rules — everything Claude needs to orient in one read.
-2. **Pre-build the slices.** Don't make Claude decide what to read at T-1. Give it a file that tells it exactly which files to read and follow. Reduces cognitive overhead and session variance.
-3. **Encode the seal in the file itself.** Each slice should end with "After reading → /compact → T-N sealed." The instruction is in the content, not just in CLAUDE.md.
-4. **Lossy is a design choice.** For analytical tasks, lossy compression is a problem. For creative tasks, the distortion between the map and the gist is generative. Design for your domain.
-5. **The zoom can go negative infinitely.** T-2, T-3, T-4 — there is no floor. The protocol scales to any level of granularity without modification.
+1. **The README is T-0, not documentation.** Rewrite it as a navigable map. Dense links, current state, rules — everything needed to orient in one read.
+2. **Pre-build the slices.** Don't make the model decide what to read at T-1. Give it a file that specifies exactly which files to read. Reduces variance.
+3. **Encode the seal in the file itself.** Each slice should end with the compact and seal instruction. The protocol is in the content, not just in CLAUDE.md.
+4. **Lossy is a design choice.** For analytical tasks, lossy compression is a problem. For creative tasks, the distortion between map and gist is generative.
+5. **DIFF is the safety valve.** It lets the user audit bubble drift without abandoning the journal bubble. Vote original or vote bubble — either is valid. The repo and the session can disagree, and the disagreement is resolved explicitly.
+6. **The zoom can go negative infinitely.** T-2, T-3, T-4 — there is no floor. The protocol scales to any level of granularity without modification.
