@@ -45,3 +45,10 @@ claude-code-homelab/
 ## Related repos
 
 - **[a777ance/localDNS](https://github.com/a777ance/localDNS)** — the case study; its CLAUDE.md links back here
+
+---
+
+## AI CTO state
+
+Read `docs/ai-cto/context.md` in this repo for current open items.
+The portfolio hub lives in `DESIGN-Full-Workflow-Integration-end-to-end-/docs/ai-cto/portfolio.md`.
