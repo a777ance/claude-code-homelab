@@ -6,14 +6,72 @@ Uses GitHub Actions + SSH. No agent or daemon needed on the server.
 
 ---
 
-## How it works
+Proceed to [05 — Best practices](05-best-practices.md).
+
+---
+
+## Testing without pushing
+
+```bash
+# Dry-run rsync to see what would change:
+rsync -avzn --delete ./unbound/ user@192.168.1.118:/etc/unbound/unbound.conf.d/
+
+# Test SSH connection the Actions runner will use:
+ssh -i ~/.ssh/deploy_key user@192.168.1.118 "echo ok"
+```
+
+---
+
+## Restricting sudo for the deploy user
+
+Don't give the deploy SSH key full sudo. Create a sudoers file that only allows the specific commands it needs:
+
+```bash
+sudo visudo -f /etc/sudoers.d/github-deploy
+```
 
 ```
-git push → GitHub Actions runner → SSH into server → rsync files → reload services
+# /etc/sudoers.d/github-deploy
+deploy ALL=(ALL) NOPASSWD: /bin/systemctl restart unbound
+deploy ALL=(ALL) NOPASSWD: /bin/systemctl daemon-reload
+deploy ALL=(ALL) NOPASSWD: /usr/bin/docker compose *
 ```
 
-The runner SSHes into your homelab server using a deploy key stored as a GitHub secret.
-It copies changed files, then runs the appropriate reload commands.
+This means a compromised deploy key can only restart specific services — not become root.
+
+---
+
+## Reload commands by service type
+
+| Service | Reload command |
+|---------|---------------|
+| systemd unit | `sudo systemctl daemon-reload && sudo systemctl restart <service>` |
+| Docker Compose | `cd ~/<folder> && docker compose up -d` |
+| unbound | `sudo systemctl restart unbound` |
+| UFW | `sudo bash ufw/setup.sh` |
+| WireGuard | `sudo systemctl restart wg-quick@wg0` |
+
+---
+
+## Step 3: Scope what gets deployed
+
+Don't deploy everything blindly. Your workflow should:
+- Copy only the service config files (not README, CLAUDE.md, docs/)
+- Run reload commands only for services whose files actually changed
+- Fail loudly if SSH can't connect (don't silently skip)
+
+---
+
+## Step 2: Add the workflow
+
+Create `.github/workflows/deploy.yml` in your repo.
+A ready-to-use template is at [templates/deploy.yml](../templates/deploy.yml).
+
+The workflow:
+1. Triggers on push to `main`
+2. Sets up SSH with your deploy key
+3. rsyncs the repo to the server
+4. Runs reload commands for any services whose files changed
 
 ---
 
@@ -40,69 +98,11 @@ Also add these secrets:
 
 ---
 
-## Step 2: Add the workflow
-
-Create `.github/workflows/deploy.yml` in your repo.
-A ready-to-use template is at [templates/deploy.yml](../templates/deploy.yml).
-
-The workflow:
-1. Triggers on push to `main`
-2. Sets up SSH with your deploy key
-3. rsyncs the repo to the server
-4. Runs reload commands for any services whose files changed
-
----
-
-## Step 3: Scope what gets deployed
-
-Don't deploy everything blindly. Your workflow should:
-- Copy only the service config files (not README, CLAUDE.md, docs/)
-- Run reload commands only for services whose files actually changed
-- Fail loudly if SSH can't connect (don't silently skip)
-
----
-
-## Reload commands by service type
-
-| Service | Reload command |
-|---------|---------------|
-| systemd unit | `sudo systemctl daemon-reload && sudo systemctl restart <service>` |
-| Docker Compose | `cd ~/<folder> && docker compose up -d` |
-| unbound | `sudo systemctl restart unbound` |
-| UFW | `sudo bash ufw/setup.sh` |
-| WireGuard | `sudo systemctl restart wg-quick@wg0` |
-
----
-
-## Restricting sudo for the deploy user
-
-Don't give the deploy SSH key full sudo. Create a sudoers file that only allows the specific commands it needs:
-
-```bash
-sudo visudo -f /etc/sudoers.d/github-deploy
-```
+## How it works
 
 ```
-# /etc/sudoers.d/github-deploy
-deploy ALL=(ALL) NOPASSWD: /bin/systemctl restart unbound
-deploy ALL=(ALL) NOPASSWD: /bin/systemctl daemon-reload
-deploy ALL=(ALL) NOPASSWD: /usr/bin/docker compose *
+git push → GitHub Actions runner → SSH into server → rsync files → reload services
 ```
 
-This means a compromised deploy key can only restart specific services — not become root.
-
----
-
-## Testing without pushing
-
-```bash
-# Dry-run rsync to see what would change:
-rsync -avzn --delete ./unbound/ user@192.168.1.118:/etc/unbound/unbound.conf.d/
-
-# Test SSH connection the Actions runner will use:
-ssh -i ~/.ssh/deploy_key user@192.168.1.118 "echo ok"
-```
-
----
-
-Proceed to [05 — Best practices](05-best-practices.md).
+The runner SSHes into your homelab server using a deploy key stored as a GitHub secret.
+It copies changed files, then runs the appropriate reload commands.

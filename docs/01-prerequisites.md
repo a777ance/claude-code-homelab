@@ -4,29 +4,50 @@ Everything you need installed before touching Claude Code. Do these in order.
 
 ---
 
-## 1. Git
+## You're ready
 
-**Windows:** Download from [git-scm.com](https://git-scm.com/download/win). During install:
-- Select "Git from the command line and also from 3rd-party software"
-- Select "Use bundled OpenSSH" (avoids conflicts with Windows OpenSSH)
-- Leave everything else default
+Proceed to [02 — Repo structure](02-repo-structure.md).
 
-Verify:
+---
+
+## 5. Claude Code
+
+Claude Code is a CLI that also runs inside VS Code as an extension.
+
+**Install the CLI:**
 ```bash
-git --version
-# git version 2.x.x
+npm install -g @anthropic-ai/claude-code
+```
+*(Requires Node.js 18+. Install from [nodejs.org](https://nodejs.org/) if needed.)*
+
+**Install the VS Code extension:**
+Search "Claude Code" in the VS Code Extensions panel (Ctrl+Shift+X).
+
+**Authenticate:**
+```bash
+claude
+# Follow the browser prompt to connect your Anthropic account
 ```
 
 ---
 
-## 2. VS Code
+## 4. GitHub CLI (`gh`)
 
-Download from [code.visualstudio.com](https://code.visualstudio.com/).
+The `gh` CLI lets you create repos, open PRs, and manage issues from the terminal.
 
-Install these extensions (Ctrl+Shift+X → search):
-- **GitLens** — inline blame, history, branch management
-- **GitHub Pull Requests** — review PRs without leaving VS Code
-- **Remote - SSH** *(optional)* — edit files directly on your server
+**Windows:** Download the installer from [cli.github.com](https://cli.github.com/).
+
+Authenticate:
+```bash
+gh auth login
+# Choose: GitHub.com → SSH → your key → Login with a web browser
+```
+
+Verify:
+```bash
+gh auth status
+# ✓ Logged in to github.com as yourname
+```
 
 ---
 
@@ -55,47 +76,26 @@ ssh -T git@github.com
 
 ---
 
-## 4. GitHub CLI (`gh`)
+## 2. VS Code
 
-The `gh` CLI lets you create repos, open PRs, and manage issues from the terminal.
+Download from [code.visualstudio.com](https://code.visualstudio.com/).
 
-**Windows:** Download the installer from [cli.github.com](https://cli.github.com/).
+Install these extensions (Ctrl+Shift+X → search):
+- **GitLens** — inline blame, history, branch management
+- **GitHub Pull Requests** — review PRs without leaving VS Code
+- **Remote - SSH** *(optional)* — edit files directly on your server
 
-Authenticate:
-```bash
-gh auth login
-# Choose: GitHub.com → SSH → your key → Login with a web browser
-```
+---
+
+## 1. Git
+
+**Windows:** Download from [git-scm.com](https://git-scm.com/download/win). During install:
+- Select "Git from the command line and also from 3rd-party software"
+- Select "Use bundled OpenSSH" (avoids conflicts with Windows OpenSSH)
+- Leave everything else default
 
 Verify:
 ```bash
-gh auth status
-# ✓ Logged in to github.com as yourname
+git --version
+# git version 2.x.x
 ```
-
----
-
-## 5. Claude Code
-
-Claude Code is a CLI that also runs inside VS Code as an extension.
-
-**Install the CLI:**
-```bash
-npm install -g @anthropic-ai/claude-code
-```
-*(Requires Node.js 18+. Install from [nodejs.org](https://nodejs.org/) if needed.)*
-
-**Install the VS Code extension:**
-Search "Claude Code" in the VS Code Extensions panel (Ctrl+Shift+X).
-
-**Authenticate:**
-```bash
-claude
-# Follow the browser prompt to connect your Anthropic account
-```
-
----
-
-## You're ready
-
-Proceed to [02 — Repo structure](02-repo-structure.md).
