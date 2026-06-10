@@ -17,6 +17,11 @@ Write it as you set things up — don't reconstruct it from memory later.
 
 Every commit to `main` should leave SETUP.md able to reproduce a working system from scratch.
 
+> **Note:** localDNS has since absorbed SETUP.md into its README.md — one file is now both
+> the setup guide and the reference. Either layout works; what matters is that *one*
+> committed file can rebuild the box. Wherever these docs say "SETUP.md," read "your
+> reproduction guide, wherever it lives."
+
 ---
 
 ## What NOT to put in the repo

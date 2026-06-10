@@ -4,6 +4,12 @@ Automate: push to `main` → files land on your server → services reload.
 
 Uses GitHub Actions + SSH. No agent or daemon needed on the server.
 
+> **Note:** this step is the *automation upgrade*, not a prerequisite. The case study
+> (localDNS) currently deploys **manually** — push to `main`, then SSH in and copy/reload
+> per its deploy-paths table; its only GitHub Action publishes the Statement gallery to
+> Pages. Start manual if you're solo; wire up this workflow when the copy-and-reload
+> routine gets old or a second person joins.
+
 ---
 
 Proceed to [05 — Best practices](05-best-practices.md).

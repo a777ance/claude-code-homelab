@@ -26,9 +26,12 @@ Come back to these docs when:
 
 ## Keeping SETUP.md current
 
+*(localDNS has since absorbed SETUP.md into its README.md — read "SETUP.md" below as "your
+reproduction guide, wherever it lives." See the note in [02 — Repo structure](02-repo-structure.md).)*
+
 Every time you make a change to the live system, ask: "If this machine died right now, could someone rebuild from SETUP.md?"
 
-If the answer is no, update SETUP.md before closing the PR.
+If the answer is no, update SETUP.md before landing the change.
 
 A useful test: periodically read SETUP.md cold and try to find steps that are missing, out of order, or no longer accurate. The homelab changing is normal — documentation rot is the enemy.
 
@@ -53,6 +56,15 @@ git reset HEAD~1            # undo the last commit (keeps changes staged)
 
 ## Branch strategy in practice
 
+Two workable models — pick one per repo and write it into that repo's CLAUDE.md:
+
+**Solo / founder-direct (what localDNS uses today).** Push coherent, deployable commits
+straight to `main` — no PRs, no parked feature branches. This is localDNS's standing
+instruction (its CLAUDE.md §3): with one operator and a manually deployed box, a branch
+is just a place for work to go stale. The discipline moves into the commit itself: every
+commit must leave the setup guide able to rebuild the system.
+
+**Branch-and-review (for teams, or once more than one person touches the repo).**
 Claude Code auto-creates branches named `claude/adjective-noun-XXXXX`. Treat these as throwaway working branches:
 
 1. Review the diff before merging to `main`
@@ -101,4 +113,4 @@ For your own changes:
 
 **Keep it honest.** Include "Known issues" — things that are broken or in progress. Claude will try to fix things that aren't broken if it thinks they should be working.
 
-**Don't put deployment instructions in CLAUDE.md.** Put those in SETUP.md. CLAUDE.md is operational context; SETUP.md is the reproduction guide.
+**Don't put deployment instructions in CLAUDE.md.** Put those in your reproduction guide (SETUP.md, or README.md if you've merged them like localDNS). CLAUDE.md is operational context; the reproduction guide is what rebuilds the box.
