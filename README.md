@@ -24,6 +24,7 @@ The `CLAUDE.md` in that repo is what a mature, Claude-aware infra repo looks lik
 
 | # | Guide | What it covers |
 |---|-------|----------------|
+| 8 | [AI process efficiency](docs/08-ai-process-efficiency.md) | Token cost, prompting, model right-sizing, hybrid routing |
 | 5 | [Best practices](docs/05-best-practices.md) | Secrets, CLAUDE.md conventions, branch strategy |
 | 4 | [Deploys](docs/04-deploys.md) | GitHub Actions: push → SSH → reload |
 | 3 | [GitHub setup](docs/03-github-setup.md) | SSH keys, remotes, branches, syncing |
