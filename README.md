@@ -24,6 +24,7 @@ The `CLAUDE.md` in that repo is what a mature, Claude-aware infra repo looks lik
 
 | # | Guide | What it covers |
 |---|-------|----------------|
+| 8 | [Token efficiency & hybrid routing](docs/08-token-efficiency-and-hybrid-routing.md) | Cut token spend; route cheap work to the local LLM stack; better prompting |
 | 5 | [Best practices](docs/05-best-practices.md) | Secrets, CLAUDE.md conventions, branch strategy |
 | 4 | [Deploys](docs/04-deploys.md) | GitHub Actions: push → SSH → reload |
 | 3 | [GitHub setup](docs/03-github-setup.md) | SSH keys, remotes, branches, syncing |
