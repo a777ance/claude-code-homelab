@@ -48,3 +48,11 @@ Someone who:
 - GitHub Actions deploy pipeline (push → auto-deploy to your server)
 - A `CLAUDE.md` that makes Claude genuinely useful for your specific stack
 - Best practices: branch strategy, secrets handling, SSH keys, syncing
+
+---
+
+## Patch Notes
+
+### 2026-07-02
+
+_No changes — no pull requests merged on 2026-07-01._
