@@ -48,3 +48,11 @@ Someone who:
 - GitHub Actions deploy pipeline (push → auto-deploy to your server)
 - A `CLAUDE.md` that makes Claude genuinely useful for your specific stack
 - Best practices: branch strategy, secrets handling, SSH keys, syncing
+
+---
+
+## 🌈 Bifrost
+
+This repo runs on **[Bifrost](https://a777ance.github.io/localDNS/bifrost.html)** — the
+A777ance keyboard-spatial command-composition schema, active from the first token of every
+session. The canonical spec lives in the public `localDNS` repo.
