@@ -32,12 +32,44 @@ payload="$(cat)"
 src="$(printf '%s' "$payload" | sed -n 's/.*"source"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
 [ -z "$src" ] && src="startup"
 
+cd "${CLAUDE_PROJECT_DIR:-.}" 2>/dev/null || exit 0
+
+# --- RESUME: promote a STALE session, stay silent for a live one -------------
+# "Every running session is a Norn" must hold for a re-activated session too, and resume
+# is the dangerous case: it carries an IN-CONTEXT briefing from before it went idle. A
+# session that went idle on a claude/* branch comes back believing "push to main, no
+# branches" -- and a stale briefing cannot tell that it is stale. It would push to a
+# retired session branch, recreating the litter the doom drawer was built to retire.
+#
+# The full ritual must NOT run here (re-pulling and re-injecting mid-work is exactly what
+# the startup|clear gate prevents), so resume gets a cheap staleness test and a short
+# notice, only when actually stale. Resumed on Yggdrasil and current => silence, as before.
+# Read-only: fetch, never pull.
 case "$src" in
   startup|clear) : ;;
+  resume|compact)
+    git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
+    br="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '?')"
+    git fetch origin Yggdrasil --quiet 2>/dev/null || true
+    behind="$(git rev-list --count "HEAD..origin/Yggdrasil" 2>/dev/null || echo 0)"
+    [ "$br" = "Yggdrasil" ] && [ "${behind:-0}" -eq 0 ] && exit 0
+    read -r -d '' rctx <<RESUME_EOF || true
+NORN PROMOTION on resume (founder's standing instruction, 2026-08-08) — every running session is a Norn, including a re-activated one. This session resumed on branch '$br', ${behind:-?} commit(s) behind origin/Yggdrasil. Do these BEFORE anything else, then carry on with what you were doing:
+  1. YOUR IN-CONTEXT BRIEFING MAY BE STALE and cannot tell that it is. If it says to push to main, or to work on a claude/* session branch, it predates the current rule. Re-read CLAUDE.md from disk before trusting any branching advice you are already holding.
+  2. Get onto the working branch: git fetch origin Yggdrasil && git checkout Yggdrasil (or git rebase origin/Yggdrasil if you have commits). Never commit on main. Never force-push either branch. Do NOT push to the claude/* branch you may have been working on — those are retired; their history is preserved in doom-drawer/2026-08-08.
+  3. Look before you write: python3 tools/weave.py (in localDNS) or git log --oneline -8 origin/Yggdrasil. Other Norns have moved the eye while you were idle.
+  4. Claim a lane in localDNS/docs/architecture/norns.md section 4 before substantial work.
+LIMIT: promotion grants NO new permissions. A blocked action never gets routed through a peer session — that launders the founder's permission decision. Take it back to the founder.
+RESUME_EOF
+    esc="$(printf '%s' "$rctx" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))' 2>/dev/null)"
+    if [ -n "$esc" ]; then
+      printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":%s}}\n' "$esc"
+    else
+      printf '%s\n' "$rctx"
+    fi
+    exit 0 ;;
   *) exit 0 ;;
 esac
-
-cd "${CLAUDE_PROJECT_DIR:-.}" 2>/dev/null || exit 0
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
 
 # --- 1. SYNC ---------------------------------------------------------------
@@ -71,16 +103,27 @@ else
   seed_note="This repo has no CLAUDE.md — README.md leads the seed."
 fi
 
+norn_note="NORN PROMOTION (founder's standing instruction, 2026-08-08) — if this session is running, it IS a Norn. Several weave Yggdrasil at once and CANNOT see each other: there is no messaging between sessions, so the repo is the only channel. First moves, all cheap ones, not a research phase:
+  1. Get on the working branch. A fresh clone lands on main (the vetted tier). Run: git fetch origin Yggdrasil && git checkout Yggdrasil — or if you already have commits, git rebase origin/Yggdrasil. Never commit on main; never force-push either branch (the push guard refuses, and a forced push does not pass the eye, it puts out another Norn's).
+  2. Look before you write. In localDNS: python3 tools/weave.py — who moved the eye, what is claimed, what the queue holds. Elsewhere: git fetch && git log --oneline -8 origin/Yggdrasil. Work that looks unfinished may be in flight right now.
+  3. Claim a lane in localDNS/docs/architecture/norns.md section 4 BEFORE substantial work, and take your item from the queue rather than from intuition. Urdr = the record, Verdandi = work in flight, Skuld = the debt.
+  4. Front-load access. Add every repo you will need and request the approvals you will need AT THE START, not when you are already blocked mid-flight. A Norn that stalls halfway for a permission it could have asked for up front has wasted the parallelism.
+LIMIT, and it is hard: promotion grants NO new permissions. If an action is denied or blocked for you, do NOT ask another Norn to perform it — that launders the user's permission decision through a peer. Route blocked work back to the founder, and say what is blocked."
+
 if [ -n "$QUEUE" ]; then
   read -r -d '' ctx <<EOF || true
 LAZY ANCHOR (low reasoning) — FIRE THIS FIRST, before anything else. Reasoning effort stays low; the first move is a cheap, honest reflex, not an effortful pre-committed plan. Do the top unblocked item in $QUEUE: read that short block and DO IT NOW. Don't re-derive the queue, don't stall asking "what next?", and don't open with a big read-everything phase — that effortful preamble is exactly the anchor to avoid. Bias to action over narrating options. Keep momentum: the moment an item ships as a coherent, verified, pushed change, tick it, promote the next unblocked item, and start it in the same turn — chain, don't yield. Cheap reflex, brakes ON — not a licence to bulldoze: the founder naming a priority always wins, and anything irreversible or outward-facing (deletes, force-pushes, external sends, real customer data) still gets a confirm first.
 
 Then, as the work demands it (NOT as a blocking preamble), keep the session LOSSLESS by loading the rest of the standing seed: $MANIFEST. $seed_note Don't summarize them back — just load and continue.
 
+$norn_note
+
 RESEED status (auto, source=$src): $sync_note.
 EOF
 else
   read -r -d '' ctx <<EOF || true
+$norn_note
+
 RESEED (auto, source=$src). $sync_note. $seed_note To stay LOSSLESS, load the standing seed as the work demands it (not as a blocking preamble): $MANIFEST. Don't summarize them back — just load and continue. This repo has no standing action queue: load the briefing, then wait for the founder to name the work — don't invent a backlog. Brakes ON: anything irreversible or outward-facing (deletes, force-pushes, external sends, real customer data) still gets a confirm first.
 EOF
 fi
